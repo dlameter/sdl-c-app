@@ -1,2 +1,2 @@
-** SDL C App
+## SDL C App
 Looking through windows.
