@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <SDL.h>
+#include <SDL_mixer.h>
 
 struct Player {
     double x;
@@ -22,8 +23,6 @@ int main() {
     SDL_Window* window = NULL;
     SDL_Surface* surface = NULL;
 
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         printf("SDL_Init failed: %s\n", SDL_GetError());
 
@@ -40,6 +39,12 @@ int main() {
             SDL_DestroyWindow(window);
             SDL_Quit();
             
+            return 1;
+        }
+
+        // Initialize SDL MIX
+        if ( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 1, 32768) < 0) {
+            printf("SDL_mixer could not initialize! SDL_mixer error: %s\n", Mix_GetError());
             return 1;
         }
 
@@ -78,6 +83,24 @@ int main() {
 
         SDL_Event event;
 
+        // Load music
+        Mix_Music * gMusic = Mix_LoadMUS("assets/music.wav");
+        if (gMusic == NULL) {
+            printf("Failed to load music! SDL_mixer error: %s\n", Mix_GetError());
+            return 1;
+        }
+        
+        // Load sound
+        Mix_Chunk * gSound = Mix_LoadWAV("assets/baseball_hit.wav");
+        if (gSound == NULL) {
+            printf("Failed to load baseball_hit! SDL_mixer error: %s\n", Mix_GetError());
+            return 1;
+        }
+
+        Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
+        // Play music
+        Mix_PlayMusic(gMusic, -1);
+
         // Create Timer
         Uint32 start_time = SDL_GetTicks();
 
@@ -105,6 +128,9 @@ int main() {
                         }
                         if (event.key.keysym.sym == SDLK_RIGHT) {
                             button.left = true;
+                        }
+                        if (event.key.keysym.sym == SDLK_1) {
+                            Mix_PlayChannel(-1 , gSound, 0);
                         }
                         break;
                     case SDL_KEYUP:
@@ -166,8 +192,18 @@ int main() {
             SDL_UpdateWindowSurface(window);
         }
 
+        // Free sound
+        Mix_FreeChunk(gSound);
+        gSound = NULL;
+
+        // Free music
+        Mix_FreeMusic(gMusic);
+        gMusic = NULL;
+        
         SDL_FreeSurface(image);
         SDL_DestroyWindow(window);
+        
+        Mix_Quit();
         SDL_Quit();
     }
 
