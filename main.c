@@ -68,6 +68,15 @@ int main() {
             return 1;
         }
 
+        // Initialize SDL IMAGE
+        int img_flags = IMG_INIT_PNG;
+        int img_initted = IMG_Init(img_flags);
+        if ((img_initted&img_flags) != img_flags) {
+            printf("SDL_image failed to initialize png!");
+            printf("SDL_image error: %s\n", IMG_GetError());
+            return 1;
+        }
+
         surface = SDL_GetWindowSurface(window);
 
         // Build player
@@ -243,6 +252,7 @@ int main() {
         SDL_DestroyWindow(window);
         
         TTF_Quit();
+        IMG_Quit();
         Mix_Quit();
         SDL_Quit();
     }
