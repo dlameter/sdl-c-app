@@ -85,6 +85,11 @@ int main() {
         SDL_BlitSurface(image, NULL, surface, NULL);
 
         // Load font
+        TTF_Font* font = TTF_OpenFont("assets/OpenSans-Regular.ttf", 16);
+        if (!font) {
+          printf("Could not load font! SDL_ttf error: %s\n", TTF_GetError());
+          return 1;
+        }
         
         SDL_FillRect(surface, &player.rect, player.color);
 
@@ -208,6 +213,10 @@ int main() {
         // Free music
         Mix_FreeMusic(gMusic);
         gMusic = NULL;
+
+        // Free font
+        TTF_CloseFont(font);
+        font = NULL;
         
         SDL_FreeSurface(image);
         SDL_DestroyWindow(window);
