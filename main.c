@@ -31,7 +31,7 @@ int main() {
         return 1;
     }
     else {
-        window = SDL_CreateWindow("My First Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 400, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow("MyWeather", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 400, SDL_WINDOW_SHOWN);
 
         if (window == NULL) {
             printf("Window creation failed: %s\n", SDL_GetError());
