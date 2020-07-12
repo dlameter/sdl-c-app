@@ -198,10 +198,24 @@ int main() {
             // Reset timer
             start_time = SDL_GetTicks();
 
+            // Clear surface
+            SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x00, 0x00, 0x00));
+
             // Render
             SDL_BlitSurface(image, NULL, surface, NULL);
 
             SDL_FillRect(surface, &player.rect, player.color);
+
+            // Draw text
+            SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
+            SDL_Surface* text_surface;
+            if (!(text_surface = TTF_RenderText_Blended(font, "Hello, World!", text_color))) {
+                printf("Failed to render ttf surface! SDL_ttf error: %s\n", TTF_GetError());
+            }
+            else {
+                SDL_BlitSurface(text_surface, NULL, surface, NULL);
+                SDL_FreeSurface(text_surface);
+            }
 
             SDL_UpdateWindowSurface(window);
         }
