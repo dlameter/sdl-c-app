@@ -1,2 +1,2 @@
 ## SDL C App
-Looking through windows.
+A weather app that will show you the current weather in your area.
