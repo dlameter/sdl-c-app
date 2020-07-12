@@ -105,6 +105,14 @@ int main() {
         // Load background image
         SDL_Surface* image = SDL_LoadBMP("another_test.bmp");
         SDL_BlitSurface(image, NULL, surface, NULL);
+        
+        // Load image
+        SDL_Surface* weather_image = IMG_Load("assets/iconfinder_Raining.png");
+        if (!weather_image) {
+            printf("SDL_image: Failed to load image. %s\n", IMG_GetError());
+            return 1;
+        }
+        SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
         // Load font
         TTF_Font* font = TTF_OpenFont("assets/OpenSans-Regular.ttf", 16);
@@ -225,6 +233,8 @@ int main() {
 
             // Render
             SDL_BlitSurface(image, NULL, surface, NULL);
+
+            SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
             SDL_FillRect(surface, &player.rect, player.color);
 
