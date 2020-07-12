@@ -20,6 +20,18 @@ struct ButtonState {
     bool left;
 };
 
+void drawText(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
+    SDL_Surface* text_surface;
+
+    if (!(text_surface = TTF_RenderText_Blended(font, text, color))) {
+        printf("Failed to render text to surface! SDL_ttf error: %s\n", TTF_GetError());
+    }
+    else {
+        SDL_BlitSurface(text_surface, NULL, surface, pos);
+        SDL_FreeSurface(text_surface);
+    }
+}
+
 int main() {
     SDL_Window* window = NULL;
     SDL_Surface* surface = NULL;
@@ -208,14 +220,8 @@ int main() {
 
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
-            SDL_Surface* text_surface;
-            if (!(text_surface = TTF_RenderText_Blended(font, "Hello, World!", text_color))) {
-                printf("Failed to render ttf surface! SDL_ttf error: %s\n", TTF_GetError());
-            }
-            else {
-                SDL_BlitSurface(text_surface, NULL, surface, NULL);
-                SDL_FreeSurface(text_surface);
-            }
+            SDL_Rect text_position = {100, 10, 0, 0};
+            drawText(surface, "Hello, World!", font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
         }
