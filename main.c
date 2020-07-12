@@ -49,6 +49,12 @@ int main() {
             return 1;
         }
 
+        // Initialize SDL TTF
+        if ( TTF_Init() == -1 ) {
+            printf("SDL_ttf could not initialize! SDL_ttf error: %s\n", TTF_GetError());
+            return 1;
+        }
+
         surface = SDL_GetWindowSurface(window);
 
         // Build player
@@ -78,6 +84,8 @@ int main() {
         SDL_Surface* image = SDL_LoadBMP("another_test.bmp");
         SDL_BlitSurface(image, NULL, surface, NULL);
 
+        // Load font
+        
         SDL_FillRect(surface, &player.rect, player.color);
 
         SDL_UpdateWindowSurface(window);
@@ -204,6 +212,7 @@ int main() {
         SDL_FreeSurface(image);
         SDL_DestroyWindow(window);
         
+        TTF_Quit();
         Mix_Quit();
         SDL_Quit();
     }
