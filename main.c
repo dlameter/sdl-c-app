@@ -11,14 +11,6 @@
 #define KEY_SIZE 128
 #define URL_SIZE 256
 
-struct Player {
-    double x;
-    double y;
-    double speed;
-    SDL_Rect rect;
-    Uint32 color;
-};
-
 struct ButtonState {
     bool up;
     bool down;
@@ -214,22 +206,6 @@ int main() {
 
         free(json.text);
         
-        // Build player
-        struct Player player;
-        player.x = 50.0;
-        player.y = 50.0;
-        player.color = SDL_MapRGB(surface->format, 0xFF, 0x00, 0x00);
-        player.speed = 10;
-        
-        SDL_Rect rect;
-        rect.x = (int) player.x;
-        rect.y = (int) player.y;
-        rect.w = 20;
-        rect.h = 30;
-
-        player.rect = rect;
-        printf("rect x = %d y = %d\n", player.rect.x, player.rect.y);
-
         // Build button state holder
         struct ButtonState button;
         button.up = false;
@@ -248,8 +224,6 @@ int main() {
           return 1;
         }
         
-        SDL_FillRect(surface, &player.rect, player.color);
-
         SDL_UpdateWindowSurface(window);
 
         SDL_Event event;
@@ -277,9 +251,6 @@ int main() {
 
         bool quit = false;
         while (!quit) {
-            double y_speed = 0;
-            double x_speed = 0;
-
             // Input
             while(SDL_PollEvent(&event) != 0) {
                 switch (event.type) {
@@ -321,37 +292,6 @@ int main() {
                 }
             }
 
-            // Apply keys pressed to player direction
-            if (button.up) {
-                y_speed -= 1;
-            }
-            if (button.down) {
-                y_speed += 1;
-            }
-            if (button.left) {
-                x_speed += 1;
-            }
-            if (button.right) {
-                x_speed -= 1;
-            }
-
-            if (y_speed != 0 || x_speed != 0) {
-                // Normalize speed vector
-                double square_root = sqrt(y_speed * y_speed + x_speed * x_speed);
-                y_speed = (y_speed / square_root);
-                x_speed = (x_speed / square_root);
-
-                // Move player
-                double delta_time = (SDL_GetTicks() - start_time) / 1000.f;
-                player.x += x_speed * player.speed * delta_time;
-                player.y += y_speed * player.speed * delta_time;
-                printf("player x = %f y = %f\n", player.x, player.y);
-
-                player.rect.x = (int) player.x;
-                player.rect.y = (int) player.y;
-                printf("rect x = %d y = %d\n", player.rect.x, player.rect.y);
-            }
-
             // Reset timer
             start_time = SDL_GetTicks();
 
@@ -360,8 +300,6 @@ int main() {
 
             // Render
             SDL_BlitSurface(weather_image, NULL, surface, NULL);
-
-            SDL_FillRect(surface, &player.rect, player.color);
 
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
