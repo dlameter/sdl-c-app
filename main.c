@@ -5,6 +5,10 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#include <curl/curl.h>
+
+#define KEY_SIZE 128
+#define URL_SIZE 256
 
 struct Player {
     double x;
@@ -42,7 +46,25 @@ SDL_Surface* load_image(const char* path) {
     return image;
 }
 
+void read_key(char* filename, char* key, int len) {
+    FILE* key_file = fopen(filename, "r");
+    if (!key_file) {
+        printf("Failed to open key file %s!", filename);
+        exit(2);
+    }
+    fread(key, sizeof *key, len, key_file);
+    
+    // Remove trailing newlines
+    key[strcspn(key, "\r\n ")] = '\0';
+
+    fclose(key_file);
+}
+
 int main() {
+    // Read key from file
+    char api_key[KEY_SIZE];
+    read_key("key.txt", api_key, KEY_SIZE);
+
     SDL_Window* window = NULL;
     SDL_Surface* surface = NULL;
 
@@ -88,6 +110,31 @@ int main() {
 
         surface = SDL_GetWindowSurface(window);
 
+        // Get weather data
+        char url[URL_SIZE];
+        char cityname[] = "Chicago";
+        int len = sprintf(url, "api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", cityname, api_key);
+        
+        printf("url: %s, %d\n", url, (int) strlen(url));
+
+        CURL* curl;
+        CURLcode res;
+
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+
+        curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url);
+
+            res = curl_easy_perform(curl);
+            if (res != CURLE_OK) {
+                printf("curl_easy_perform failed: %s\n", curl_easy_strerror(res));
+            }
+            curl_easy_cleanup(curl);
+        }
+
+        curl_global_cleanup();
+        
         // Build player
         struct Player player;
         player.x = 50.0;
