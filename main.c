@@ -102,10 +102,6 @@ int main() {
         button.right = false;
         button.left = false;
 
-        // Load background image
-        SDL_Surface* image = SDL_LoadBMP("another_test.bmp");
-        SDL_BlitSurface(image, NULL, surface, NULL);
-        
         // Load image
         SDL_Surface* weather_image = IMG_Load("assets/iconfinder_Raining.png");
         if (!weather_image) {
@@ -232,8 +228,6 @@ int main() {
             SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x00, 0x00, 0x00));
 
             // Render
-            SDL_BlitSurface(image, NULL, surface, NULL);
-
             SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
             SDL_FillRect(surface, &player.rect, player.color);
@@ -258,7 +252,7 @@ int main() {
         TTF_CloseFont(font);
         font = NULL;
         
-        SDL_FreeSurface(image);
+        SDL_FreeSurface(weather_image);
         SDL_DestroyWindow(window);
         
         TTF_Quit();
