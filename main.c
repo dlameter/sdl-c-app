@@ -11,13 +11,6 @@
 #define KEY_SIZE 128
 #define URL_SIZE 256
 
-struct ButtonState {
-    bool up;
-    bool down;
-    bool right;
-    bool left;
-};
-
 void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
@@ -206,13 +199,6 @@ int main() {
 
         free(json.text);
         
-        // Build button state holder
-        struct ButtonState button;
-        button.up = false;
-        button.down = false;
-        button.right = false;
-        button.left = false;
-
         // Load image
         SDL_Surface* weather_image = load_image("assets/iconfinder_Raining.png");
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
@@ -259,34 +245,8 @@ int main() {
                         quit = true;
                         break;
                     case SDL_KEYDOWN:
-                        if (event.key.keysym.sym == SDLK_UP) {
-                            button.up = true;
-                        }
-                        if (event.key.keysym.sym == SDLK_DOWN) {
-                            button.down = true;
-                        }
-                        if (event.key.keysym.sym == SDLK_LEFT) {
-                            button.right = true;
-                        }
-                        if (event.key.keysym.sym == SDLK_RIGHT) {
-                            button.left = true;
-                        }
                         if (event.key.keysym.sym == SDLK_1) {
                             Mix_PlayChannel(-1 , gSound, 0);
-                        }
-                        break;
-                    case SDL_KEYUP:
-                        if (event.key.keysym.sym == SDLK_UP) {
-                            button.up = false;
-                        }
-                        if (event.key.keysym.sym == SDLK_DOWN) {
-                            button.down = false;
-                        }
-                        if (event.key.keysym.sym == SDLK_LEFT) {
-                            button.right = false;
-                        }
-                        if (event.key.keysym.sym == SDLK_RIGHT) {
-                            button.left = false;
                         }
                         break;
                 }
