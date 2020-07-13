@@ -21,7 +21,7 @@ struct ButtonState {
     bool left;
 };
 
-void drawText(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
+void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
     if (!(text_surface = TTF_RenderText_Blended(font, text, color))) {
@@ -31,6 +31,15 @@ void drawText(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color 
         SDL_BlitSurface(text_surface, NULL, surface, pos);
         SDL_FreeSurface(text_surface);
     }
+}
+
+SDL_Surface* load_image(const char* path) {
+    SDL_Surface* image = IMG_Load(path);
+    if (!image) {
+        printf("SDL_image: Failed to load image at %s. %s\n", path, IMG_GetError());
+        exit(2);
+    }
+    return image;
 }
 
 int main() {
@@ -103,11 +112,7 @@ int main() {
         button.left = false;
 
         // Load image
-        SDL_Surface* weather_image = IMG_Load("assets/iconfinder_Raining.png");
-        if (!weather_image) {
-            printf("SDL_image: Failed to load image. %s\n", IMG_GetError());
-            return 1;
-        }
+        SDL_Surface* weather_image = load_image("assets/iconfinder_Raining.png");
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
         // Load font
@@ -235,7 +240,7 @@ int main() {
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
             SDL_Rect text_position = {100, 10, 0, 0};
-            drawText(surface, "Hello, World!", font, text_color, &text_position);
+            draw_text(surface, "Hello, World!", font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
         }
