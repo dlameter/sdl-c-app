@@ -195,6 +195,10 @@ int main() {
         int weather_id = 0;
         read_json(json.text, json.size, &temperature, &weather_id);
 
+        // Create weather
+        char temperature_string[128];
+        sprintf(temperature_string, "%f degrees Calvin. Weather type %d.", temperature, weather_id);
+
         printf("Temperature and weather id: %f %d\n", temperature, weather_id);
 
         free(json.text);
@@ -264,7 +268,7 @@ int main() {
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
             SDL_Rect text_position = {100, 10, 0, 0};
-            draw_text(surface, "Hello, World!", font, text_color, &text_position);
+            draw_text(surface, temperature_string, font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
         }
