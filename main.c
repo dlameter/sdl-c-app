@@ -5,6 +5,11 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#include <curl/curl.h>
+#include <json-c/json.h>
+
+#define KEY_SIZE 128
+#define URL_SIZE 256
 
 struct Player {
     double x;
@@ -21,7 +26,7 @@ struct ButtonState {
     bool left;
 };
 
-void drawText(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
+void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
     if (!(text_surface = TTF_RenderText_Blended(font, text, color))) {
@@ -33,7 +38,97 @@ void drawText(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color 
     }
 }
 
+SDL_Surface* load_image(const char* path) {
+    SDL_Surface* image = IMG_Load(path);
+    if (!image) {
+        printf("SDL_image: Failed to load image at %s. %s\n", path, IMG_GetError());
+        exit(2);
+    }
+    return image;
+}
+
+void read_key(char* filename, char* key, int len) {
+    FILE* key_file = fopen(filename, "r");
+    if (!key_file) {
+        printf("Failed to open key file %s!", filename);
+        exit(2);
+    }
+    fread(key, sizeof *key, len, key_file);
+    
+    // Remove trailing newlines
+    key[strcspn(key, "\r\n ")] = '\0';
+
+    fclose(key_file);
+}
+
+void read_json(char* json_string, int len, double* temp, int* weather_id) {
+    json_tokener* tok = json_tokener_new();
+
+    json_object* jobj = NULL;
+    enum json_tokener_error jerr;
+
+
+    jobj = json_tokener_parse_ex(tok, json_string, len);
+    jerr = json_tokener_get_error(tok);
+    if (jerr != json_tokener_success) {
+        printf("Json parse failed! %s", json_tokener_error_desc(jerr));
+        exit(2);
+    }
+
+
+    json_object* t = NULL;
+    json_object_object_get_ex(jobj, "main", &t);
+    json_object_object_get_ex(t, "temp", &t);
+    if (json_object_is_type(t, json_type_double)) {
+        *temp = json_object_get_double(t);
+    }
+    else {
+        *temp = 0;
+    }
+
+
+    json_object* wid = NULL;
+    json_object_object_get_ex(jobj, "weather", &wid);
+    wid = json_object_array_get_idx(wid, 0);
+    json_object_object_get_ex(wid, "id", &wid);
+    if (json_object_is_type(wid, json_type_int)) {
+        *weather_id = json_object_get_int(wid);
+    }
+    else {
+        *weather_id = -1;
+    }
+
+    json_object_put(jobj);
+}
+
+struct response {
+    char* text;
+    size_t size;
+};
+
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    size_t true_size = size * nmemb;
+
+    struct response* temp = (struct response *) userdata;
+
+    char* data = realloc(temp->text, temp->size + true_size + 1);
+    if (ptr == NULL) {
+        return 0;
+    }
+
+    temp->text = data;
+    memcpy(&(temp->text[temp->size]), ptr, true_size);
+    temp->size += true_size;
+    temp->text[temp->size] = 0;
+
+    return true_size;
+}
+
 int main() {
+    // Read key from file
+    char api_key[KEY_SIZE];
+    read_key("key.txt", api_key, KEY_SIZE);
+
     SDL_Window* window = NULL;
     SDL_Surface* surface = NULL;
 
@@ -79,6 +174,46 @@ int main() {
 
         surface = SDL_GetWindowSurface(window);
 
+        // Get weather data
+        char url[URL_SIZE];
+        char cityname[] = "Chicago";
+        int len = sprintf(url, "api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", cityname, api_key);
+        
+        printf("url: %s, %d\n", url, len);
+
+        struct response json;
+        json.text = (char*)malloc(1*sizeof(char));
+        CURL* curl;
+        CURLcode res;
+
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+
+        curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url);
+
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&json);
+
+            res = curl_easy_perform(curl);
+            if (res != CURLE_OK) {
+                printf("curl_easy_perform failed: %s\n", curl_easy_strerror(res));
+            }
+            curl_easy_cleanup(curl);
+        }
+
+        curl_global_cleanup();
+        
+        printf("Response text: %s\nResponse size: %d\n", json.text, (int) json.size);
+
+        double temperature = 0.0;
+        int weather_id = 0;
+        read_json(json.text, json.size, &temperature, &weather_id);
+
+        printf("Temperature and weather id: %f %d\n", temperature, weather_id);
+
+        free(json.text);
+        
         // Build player
         struct Player player;
         player.x = 50.0;
@@ -102,16 +237,8 @@ int main() {
         button.right = false;
         button.left = false;
 
-        // Load background image
-        SDL_Surface* image = SDL_LoadBMP("another_test.bmp");
-        SDL_BlitSurface(image, NULL, surface, NULL);
-        
         // Load image
-        SDL_Surface* weather_image = IMG_Load("assets/iconfinder_Raining.png");
-        if (!weather_image) {
-            printf("SDL_image: Failed to load image. %s\n", IMG_GetError());
-            return 1;
-        }
+        SDL_Surface* weather_image = load_image("assets/iconfinder_Raining.png");
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
         // Load font
@@ -232,8 +359,6 @@ int main() {
             SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x00, 0x00, 0x00));
 
             // Render
-            SDL_BlitSurface(image, NULL, surface, NULL);
-
             SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
             SDL_FillRect(surface, &player.rect, player.color);
@@ -241,7 +366,7 @@ int main() {
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
             SDL_Rect text_position = {100, 10, 0, 0};
-            drawText(surface, "Hello, World!", font, text_color, &text_position);
+            draw_text(surface, "Hello, World!", font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
         }
@@ -258,7 +383,7 @@ int main() {
         TTF_CloseFont(font);
         font = NULL;
         
-        SDL_FreeSurface(image);
+        SDL_FreeSurface(weather_image);
         SDL_DestroyWindow(window);
         
         TTF_Quit();
