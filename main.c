@@ -274,13 +274,6 @@ int main() {
             printf("Failed to load music! SDL_mixer error: %s\n", Mix_GetError());
             return 1;
         }
-        
-        // Load sound
-        Mix_Chunk * gSound = Mix_LoadWAV("assets/baseball_hit.wav");
-        if (gSound == NULL) {
-            printf("Failed to load baseball_hit! SDL_mixer error: %s\n", Mix_GetError());
-            return 1;
-        }
 
         // Play music
         Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
@@ -308,9 +301,6 @@ int main() {
                         }
                         break;
                     case SDL_KEYDOWN:
-                        if (event.key.keysym.sym == SDLK_1) {
-                            Mix_PlayChannel(-1 , gSound, 0);
-                        }
                         if (event.key.keysym.sym == SDLK_ESCAPE) {
                             quit = true;
                         }
@@ -331,10 +321,6 @@ int main() {
 
             SDL_UpdateWindowSurface(window);
         }
-
-        // Free sound
-        Mix_FreeChunk(gSound);
-        gSound = NULL;
 
         // Free music
         Mix_FreeMusic(gMusic);
