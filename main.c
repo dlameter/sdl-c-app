@@ -203,9 +203,6 @@ int main() {
     char api_key[KEY_SIZE];
     read_key("key.txt", api_key, KEY_SIZE);
 
-    SDL_Window* window = NULL;
-    SDL_Surface* surface = NULL;
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         printf("SDL_Init failed: %s\n", SDL_GetError());
 
@@ -214,6 +211,9 @@ int main() {
         return 1;
     }
     else {
+        SDL_Window* window = NULL;
+        SDL_Surface* surface = NULL;
+
         // Create SDL Window
         window = SDL_CreateWindow("MyWeather", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, SDL_WINDOW_SHOWN);
         if (window == NULL) {
