@@ -330,9 +330,11 @@ int main() {
         TTF_CloseFont(font);
         font = NULL;
         
+        // Free up SDL window and it's surface
         SDL_FreeSurface(weather_image);
         SDL_DestroyWindow(window);
         
+        // Cleanup SDL library and it's extensions
         TTF_Quit();
         IMG_Quit();
         Mix_Quit();
