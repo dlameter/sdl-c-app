@@ -58,6 +58,29 @@ int weather_id_to_array_id(int weather_id) {
     return -1;
 }
 
+struct response {
+    char* text;
+    size_t size;
+};
+
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    size_t true_size = size * nmemb;
+
+    struct response* temp = (struct response *) userdata;
+
+    char* data = realloc(temp->text, temp->size + true_size + 1);
+    if (ptr == NULL) {
+        return 0;
+    }
+
+    temp->text = data;
+    memcpy(&(temp->text[temp->size]), ptr, true_size);
+    temp->size += true_size;
+    temp->text[temp->size] = 0;
+
+    return true_size;
+}
+
 void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
@@ -87,7 +110,7 @@ void read_key(char* filename, char* key, int len) {
     }
     fread(key, sizeof *key, len, key_file);
     
-    // Remove trailing newlines
+    // Remove trailing newline
     key[strcspn(key, "\r\n ")] = '\0';
 
     fclose(key_file);
@@ -99,7 +122,7 @@ void read_json(char* json_string, int len, double* temp, int* weather_id) {
     json_object* jobj = NULL;
     enum json_tokener_error jerr;
 
-
+    // Parse json response
     jobj = json_tokener_parse_ex(tok, json_string, len);
     jerr = json_tokener_get_error(tok);
     if (jerr != json_tokener_success) {
@@ -107,7 +130,7 @@ void read_json(char* json_string, int len, double* temp, int* weather_id) {
         exit(2);
     }
 
-
+    // Get the value of /main/temp
     json_object* t = NULL;
     json_object_object_get_ex(jobj, "main", &t);
     json_object_object_get_ex(t, "temp", &t);
@@ -118,7 +141,7 @@ void read_json(char* json_string, int len, double* temp, int* weather_id) {
         *temp = 0;
     }
 
-
+    // Get value of /weather/0/id
     json_object* wid = NULL;
     json_object_object_get_ex(jobj, "weather", &wid);
     wid = json_object_array_get_idx(wid, 0);
@@ -130,30 +153,49 @@ void read_json(char* json_string, int len, double* temp, int* weather_id) {
         *weather_id = -1;
     }
 
+    // Clean up json object
     json_object_put(jobj);
 }
 
-struct response {
-    char* text;
-    size_t size;
-};
+void call_api(char* api_key, char* cityname, double* kelvin, int* weather_id) {
+    char url[URL_SIZE];
+    int len = sprintf(url, "api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", cityname, api_key);
+    
+    printf("url: %s, %d\n", url, len);
 
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    size_t true_size = size * nmemb;
+    struct response json;
 
-    struct response* temp = (struct response *) userdata;
+    json.text = (char*)malloc(1*sizeof(char));
+    *json.text = ' ';
+    json.size = 1;
 
-    char* data = realloc(temp->text, temp->size + true_size + 1);
-    if (ptr == NULL) {
-        return 0;
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    CURL* curl;
+    CURLcode res;
+
+    curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&json);
+
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform failed: %s\n", curl_easy_strerror(res));
+        }
+        curl_easy_cleanup(curl);
     }
+ 
+    curl_global_cleanup();
+    
+    printf("Response text: %s\nResponse size: %d\n", json.text, (int) json.size);
 
-    temp->text = data;
-    memcpy(&(temp->text[temp->size]), ptr, true_size);
-    temp->size += true_size;
-    temp->text[temp->size] = 0;
+    read_json(json.text, json.size, kelvin, weather_id);
 
-    return true_size;
+    printf("Temperature and weather id: %f %d\n", *kelvin, *weather_id);
+
+    free(json.text);
 }
 
 int main() {
@@ -172,7 +214,7 @@ int main() {
         return 1;
     }
     else {
-        window = SDL_CreateWindow("MyWeather", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 400, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow("MyWeather", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, SDL_WINDOW_SHOWN);
 
         if (window == NULL) {
             printf("Window creation failed: %s\n", SDL_GetError());
@@ -207,51 +249,16 @@ int main() {
         surface = SDL_GetWindowSurface(window);
 
         // Get weather data
-        char url[URL_SIZE];
-        char cityname[] = "Chicago";
-        int len = sprintf(url, "api.openweathermap.org/data/2.5/weather?q=%s&appid=%s", cityname, api_key);
-        
-        printf("url: %s, %d\n", url, len);
-
-        struct response json;
-        json.text = (char*)malloc(1*sizeof(char));
-        CURL* curl;
-        CURLcode res;
-
-        curl_global_init(CURL_GLOBAL_DEFAULT);
-
-        curl = curl_easy_init();
-        if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url);
-
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&json);
-
-            res = curl_easy_perform(curl);
-            if (res != CURLE_OK) {
-                printf("curl_easy_perform failed: %s\n", curl_easy_strerror(res));
-            }
-            curl_easy_cleanup(curl);
-        }
-
-        curl_global_cleanup();
-        
-        printf("Response text: %s\nResponse size: %d\n", json.text, (int) json.size);
-
         double temperature = 0.0;
         int weather_id = 0;
-        read_json(json.text, json.size, &temperature, &weather_id);
+        call_api(api_key, "Chicago", &temperature, &weather_id);
 
-        printf("Temperature and weather id: %f %d\n", temperature, weather_id);
-
-        free(json.text);
-        
         // Load image
         SDL_Surface* weather_image = load_image(weather_map[weather_id_to_array_id(weather_id)]);
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
         // Load font
-        TTF_Font* font = TTF_OpenFont("assets/OpenSans-Regular.ttf", 16);
+        TTF_Font* font = TTF_OpenFont("assets/OpenSans-Regular.ttf", 40);
         if (!font) {
           printf("Could not load font! SDL_ttf error: %s\n", TTF_GetError());
           return 1;
@@ -275,8 +282,8 @@ int main() {
             return 1;
         }
 
-        Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
         // Play music
+        Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
         Mix_PlayMusic(gMusic, -1);
 
         // Create Timer
