@@ -254,9 +254,10 @@ int main() {
         int weather_id = 0;
         call_api(api_key, "Chicago", &temperature, &weather_id);
 
-        // Load image
+        // Load image and display it
         SDL_Surface* weather_image = load_image(weather_map[weather_id_to_array_id(weather_id)]);
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
+        SDL_UpdateWindowSurface(window);
 
         // Load font
         TTF_Font* font = TTF_OpenFont("assets/OpenSans-Regular.ttf", 40);
@@ -264,8 +265,6 @@ int main() {
           printf("Could not load font! SDL_ttf error: %s\n", TTF_GetError());
           return 1;
         }
-        
-        SDL_UpdateWindowSurface(window);
 
         SDL_Event event;
 
