@@ -11,6 +11,10 @@
 #define KEY_SIZE 128
 #define URL_SIZE 256
 
+double kelvin_to_celsius(double kelvin) {
+    return kelvin - 273.15;
+}
+
 void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
