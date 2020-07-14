@@ -83,12 +83,22 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
 
 void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
+    int width, height;
+
+    if (TTF_SizeText(font, text, &width, &height)) {
+        fprintf(stderr, "Cannot size up text! SDL ttf error %s\n", TTF_GetError());
+        width = 0;
+        height = 0;
+    }
+
+    int centered_x = pos->x - (width / 2);
+    SDL_Rect centered_pos = {centered_x, pos->y, pos->w, pos->h};
 
     if (!(text_surface = TTF_RenderText_Blended(font, text, color))) {
-        printf("Failed to render text to surface! SDL_ttf error: %s\n", TTF_GetError());
+        fprintf(stderr, "Failed to render text to surface! SDL_ttf error: %s\n", TTF_GetError());
     }
     else {
-        SDL_BlitSurface(text_surface, NULL, surface, pos);
+        SDL_BlitSurface(text_surface, NULL, surface, &centered_pos);
         SDL_FreeSurface(text_surface);
     }
 }
@@ -315,7 +325,7 @@ int main() {
 
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
-            SDL_Rect text_position = {100, 10, 0, 0};
+            SDL_Rect text_position = {128, 190, 0, 0};
             draw_text(surface, degree_text, font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
