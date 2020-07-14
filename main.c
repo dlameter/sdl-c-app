@@ -208,7 +208,14 @@ void call_api(char* api_key, char* cityname, double* kelvin, int* weather_id) {
     free(json.text);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    // Check command line arguments
+    if (argc != 2) {
+        printf("USAGE: weather <city name>\n");
+        exit(1);
+    }
+    char* cityname = argv[1];
+
     // Read key from file
     char api_key[KEY_SIZE];
     read_key("key.txt", api_key, KEY_SIZE);
@@ -262,7 +269,7 @@ int main() {
         // Get weather data
         double temperature = 0.0;
         int weather_id = 0;
-        call_api(api_key, "Chicago", &temperature, &weather_id);
+        call_api(api_key, cityname, &temperature, &weather_id);
 
         // Load image and display it
         SDL_Surface* weather_image = load_image(weather_map[weather_id_to_array_id(weather_id)]);
