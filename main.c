@@ -30,6 +30,34 @@ double kelvin_to_fahrenheit(double kelvin) {
     return ((kelvin_to_celsius(kelvin) * 9) / 5) + 32;
 }
 
+int weather_id_to_array_id(int weather_id) {
+    if (weather_id < 200) {
+        return -1;
+    }
+    if (weather_id < 300) {
+        return 0;
+    }
+    if (weather_id < 500) {
+        return 1;
+    }
+    if (weather_id < 600) {
+        return 2;
+    }
+    if (weather_id < 700) {
+        return 3;
+    }
+    if (weather_id < 800) {
+        return 4;
+    }
+    if (weather_id == 800) {
+        return 5;
+    }
+    if (weather_id > 800) {
+        return 7;
+    }
+    return -1;
+}
+
 void draw_text(SDL_Surface* surface, const char* text, TTF_Font* font, SDL_Color color, SDL_Rect* pos) {
     SDL_Surface* text_surface;
 
