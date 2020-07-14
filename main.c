@@ -327,8 +327,9 @@ int main(int argc, char** argv) {
             // Clear surface
             SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x2b, 0x2b, 0x2b));
 
-            // Render
-            SDL_BlitSurface(weather_image, NULL, surface, NULL);
+            // Render weather image
+            SDL_Rect destination = {0, -25, 0, 0};
+            SDL_BlitSurface(weather_image, NULL, surface, &destination);
 
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
