@@ -214,8 +214,8 @@ int main() {
         return 1;
     }
     else {
+        // Create SDL Window
         window = SDL_CreateWindow("MyWeather", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 256, SDL_WINDOW_SHOWN);
-
         if (window == NULL) {
             printf("Window creation failed: %s\n", SDL_GetError());
             
@@ -224,6 +224,9 @@ int main() {
             
             return 1;
         }
+        
+        // Get window's surface
+        surface = SDL_GetWindowSurface(window);
 
         // Initialize SDL MIX
         if ( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 1, 2048) < 0) {
@@ -246,8 +249,6 @@ int main() {
             return 1;
         }
 
-        // Get window's surface
-        surface = SDL_GetWindowSurface(window);
 
         // Get weather data
         double temperature = 0.0;
