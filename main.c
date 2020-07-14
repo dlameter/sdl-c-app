@@ -249,7 +249,6 @@ int main() {
             return 1;
         }
 
-
         // Get weather data
         double temperature = 0.0;
         int weather_id = 0;
@@ -309,7 +308,7 @@ int main() {
             }
 
             // Clear surface
-            SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x00, 0x00, 0x00));
+            SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x2b, 0x2b, 0x2b));
 
             // Render
             SDL_BlitSurface(weather_image, NULL, surface, NULL);
