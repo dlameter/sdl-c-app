@@ -246,6 +246,7 @@ int main() {
             return 1;
         }
 
+        // Get window's surface
         surface = SDL_GetWindowSurface(window);
 
         // Get weather data
@@ -286,9 +287,6 @@ int main() {
         Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
         Mix_PlayMusic(gMusic, -1);
 
-        // Create Timer
-        Uint32 start_time = SDL_GetTicks();
-
         char degree_text[20];
         sprintf(degree_text, "%.1f C", kelvin_to_celsius(temperature));
 
@@ -320,9 +318,6 @@ int main() {
                         break;
                 }
             }
-
-            // Reset timer
-            start_time = SDL_GetTicks();
 
             // Clear surface
             SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0x00, 0x00, 0x00));
