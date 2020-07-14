@@ -12,14 +12,14 @@
 #define URL_SIZE 256
 
 char weather_map[8][40] = {
-    "assets/iconfinder_Lightning_Cloudy.png",
-    "assets/iconfinder_Drip.png",
-    "assets/iconfinder_Raining.png",
-    "assets/iconfinder_Snow_Cloudy.png",
-    "assets/iconfinder_Foggy.png",
-    "assets/iconfinder_Sunny.png",
-    "assets/iconfinder_Moon.png",
-    "assets/iconfinder_Cloudy.png"
+        "assets/iconfinder_Lightning_Cloudy.png",
+        "assets/iconfinder_Drip.png",
+        "assets/iconfinder_Raining.png",
+        "assets/iconfinder_Snow_Cloudy.png",
+        "assets/iconfinder_Foggy.png",
+        "assets/iconfinder_Sunny.png",
+        "assets/iconfinder_Moon.png",
+        "assets/iconfinder_Cloudy.png"
     };  
 
 double kelvin_to_celsius(double kelvin) {
