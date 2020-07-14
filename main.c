@@ -247,7 +247,7 @@ int main() {
         free(json.text);
         
         // Load image
-        SDL_Surface* weather_image = load_image("assets/iconfinder_Raining.png");
+        SDL_Surface* weather_image = load_image(weather_map[weather_id_to_array_id(weather_id)]);
         SDL_BlitSurface(weather_image, NULL, surface, NULL);
 
         // Load font
