@@ -266,8 +266,6 @@ int main() {
           return 1;
         }
 
-        SDL_Event event;
-
         // Load music
         Mix_Music * gMusic = Mix_LoadMUS("assets/music.wav");
         if (gMusic == NULL) {
@@ -284,6 +282,7 @@ int main() {
 
         bool quit = false;
         bool celsius = true;
+        SDL_Event event;
         while (!quit) {
             // Input
             while(SDL_PollEvent(&event) != 0) {
