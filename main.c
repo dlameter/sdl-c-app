@@ -282,18 +282,33 @@ int main() {
         // Create Timer
         Uint32 start_time = SDL_GetTicks();
 
+        char degree_text[20];
+        sprintf(degree_text, "%.1f C", kelvin_to_celsius(temperature));
+
         bool quit = false;
+        bool celsius = true;
         while (!quit) {
             // Input
             while(SDL_PollEvent(&event) != 0) {
                 switch (event.type) {
                     case SDL_QUIT:
-                    case SDL_MOUSEBUTTONDOWN:
                         quit = true;
+                        break;
+                    case SDL_MOUSEBUTTONDOWN:
+                        celsius = !celsius;
+                        if (celsius) {
+                            sprintf(degree_text, "%.1f C", kelvin_to_celsius(temperature));
+                        }
+                        else {
+                            sprintf(degree_text, "%.0f F", kelvin_to_fahrenheit(temperature));
+                        }
                         break;
                     case SDL_KEYDOWN:
                         if (event.key.keysym.sym == SDLK_1) {
                             Mix_PlayChannel(-1 , gSound, 0);
+                        }
+                        if (event.key.keysym.sym == SDLK_ESCAPE) {
+                            quit = true;
                         }
                         break;
                 }
@@ -311,7 +326,7 @@ int main() {
             // Draw text
             SDL_Color text_color = {0xFF, 0xFF, 0xFF, 0xFF};
             SDL_Rect text_position = {100, 10, 0, 0};
-            draw_text(surface, "Hello, World!", font, text_color, &text_position);
+            draw_text(surface, degree_text, font, text_color, &text_position);
 
             SDL_UpdateWindowSurface(window);
         }
