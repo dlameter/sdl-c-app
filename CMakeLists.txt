@@ -7,6 +7,8 @@ project(SDL_Weather_App VERSION 1.0)
 
 configure_file(AppConfig.h.in AppConfig.h)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)
+
 add_executable(${PROJECT_NAME} main.c)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
