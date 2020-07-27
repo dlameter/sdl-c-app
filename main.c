@@ -115,7 +115,7 @@ SDL_Surface* load_image(const char* path) {
 void read_key(char* filename, char* key, int len) {
     FILE* key_file = fopen(filename, "r");
     if (!key_file) {
-        printf("Failed to open key file %s!", filename);
+        printf("Failed to open key file %s!\n", filename);
         exit(2);
     }
     fread(key, sizeof *key, len, key_file);
