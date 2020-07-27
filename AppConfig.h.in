@@ -1,0 +1,2 @@
+#define SDL_Weather_App_VERSION_MAJOR @SDL_Weather_App_VERSION_MAJOR@
+#define SDL_Weather_App_VERSION_MINOR @SDL_Weather_App_VERSION_MINOR@
