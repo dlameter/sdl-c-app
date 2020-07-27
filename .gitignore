@@ -1,2 +1,6 @@
 key.txt
 main
+AppConfig.h
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
